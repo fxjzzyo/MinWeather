@@ -12,5 +12,7 @@ public class MainActivity extends Activity {
         //去掉标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.weather_info);
+
+
     }
 }
