@@ -94,7 +94,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case R.id.title_update_btn:
                 SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
                 String cityCode = sharedPreferences.getString("main_city_code", "101010100");
-//            String cityCode = "101160101"; //兰州天气
                 Log.d("myWeather", cityCode);
                 if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                     Log.d("myWeather", "网络OK");
@@ -106,13 +105,36 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.title_city_manager:
                 Intent intent = new Intent(MainActivity.this, SelectActivity.class);
-                startActivity(intent);
+                intent.putExtra("current_city",city_name_Tv.getText().toString());
+//                startActivity(intent);
+                startActivityForResult(intent,1);
                 break;
             default:
                 break;
         }
 
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            String newCityCode = data.getStringExtra("cityCode");
+            Log.d("myWeather", "选择的城市代码为" + newCityCode);
+            if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+                Log.d("myWeather", "网络OK");
+                //存储新城市代码
+                SharedPreferences spf = getSharedPreferences("config", MODE_PRIVATE);
+                SharedPreferences.Editor editor = spf.edit();
+                editor.putString("main_city_code", newCityCode);
+                editor.commit();
+                //查询新选择城市的天气情况
+                queryWeatherCode(newCityCode);
+            } else {
+                Log.d("myWeather", "网络挂了");
+                Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     /**
