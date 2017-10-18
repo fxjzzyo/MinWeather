@@ -1,6 +1,7 @@
 package cn.edu.pku.zhangqixun.minweather;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +30,9 @@ import cn.edu.pku.zhangqixun.util.NetUtil;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView mUpdateBtn;
+
+    private ImageView mCitySelect;
+
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
             pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
@@ -44,6 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initView();
 
         mUpdateBtn.setOnClickListener(this);
+        mCitySelect.setOnClickListener(this);
 
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             Log.d("myWeather", "网络OK");
@@ -57,6 +62,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void initView() {
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
+        mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
 
         city_name_Tv = (TextView) findViewById(R.id.title_city_name);
         cityTv = (TextView) findViewById(R.id.city);
@@ -84,18 +90,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.title_update_btn) {
-            SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
-            String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+        switch (view.getId()){
+            case R.id.title_update_btn:
+                SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+                String cityCode = sharedPreferences.getString("main_city_code", "101010100");
 //            String cityCode = "101160101"; //兰州天气
-            Log.d("myWeather", cityCode);
-            if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
-                Log.d("myWeather", "网络OK");
-                queryWeatherCode(cityCode);
-            } else {
-                Log.d("myWeather", "网络挂了");
-                Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
-            }
+                Log.d("myWeather", cityCode);
+                if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+                    Log.d("myWeather", "网络OK");
+                    queryWeatherCode(cityCode);
+                } else {
+                    Log.d("myWeather", "网络挂了");
+                    Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.id.title_city_manager:
+                Intent intent = new Intent(MainActivity.this, SelectActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                break;
         }
 
 
