@@ -80,9 +80,9 @@ private ImageView mBackBtn;
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.title_back:
-                Intent i = new Intent();
+               /* Intent i = new Intent();
                 i.putExtra("cityCode", "101160101");
-                setResult(RESULT_OK, i);
+                setResult(RESULT_OK, i);*/
                 finish();
                 break;
             default:

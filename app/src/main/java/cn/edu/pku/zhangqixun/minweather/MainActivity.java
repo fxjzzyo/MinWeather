@@ -27,6 +27,9 @@ import java.net.URL;
 
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
 import cn.edu.pku.zhangqixun.util.NetUtil;
+import cn.edu.pku.zhangqixun.util.SPFutils;
+
+import static cn.edu.pku.zhangqixun.util.SPFutils.getStringData;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView mUpdateBtn;
@@ -56,17 +59,39 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void initEvent() {
 
         //显示上次显示的城市
-        SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
-        String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+        String cityCode = SPFutils.getStringData(this,"main_city_code","101010100");
         Log.d("myWeather", cityCode);
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             queryWeatherCode(cityCode);
         } else {
+            //显示本地的，上次显示的天气信息
+            setWeatherFromSpf();
             Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
         }
 
         mUpdateBtn.setOnClickListener(this);
         mCitySelect.setOnClickListener(this);
+    }
+
+    /**
+     * 显示本地SharedPreferences的，上次的天气信息
+     */
+    private void setWeatherFromSpf() {
+        TodayWeather todayWeather = new TodayWeather();
+        getStringData(this,"city","北京");
+        todayWeather.setUpdatetime(getStringData(this,"updatetime",todayWeather.getUpdatetime()));
+        todayWeather.setWendu(getStringData(this, "wendu", todayWeather.getWendu()));
+        todayWeather.setShidu(getStringData(this,"shidu",todayWeather.getShidu()));
+        todayWeather.setPm25(getStringData(this,"pm25",todayWeather.getPm25()));
+        todayWeather.setFengxiang(getStringData(this,"fengxiang",todayWeather.getFengxiang()));
+        todayWeather.setFengli(getStringData(this,"fengli",todayWeather.getFengli()));
+        todayWeather.setDate(getStringData(this,"date",todayWeather.getDate()));
+        todayWeather.setHigh(getStringData(this,"high",todayWeather.getHigh()));
+        todayWeather.setLow(getStringData(this,"low",todayWeather.getLow()));
+        todayWeather.setType(getStringData(this,"type",todayWeather.getType()));
+        //更新天气界面
+        updateTodayWeather(todayWeather);
+
     }
 
     private void initView() {
@@ -132,11 +157,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.d("myWeather", "选择的城市代码为" + newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
-                //存储新城市代码
-                SharedPreferences spf = getSharedPreferences("config", MODE_PRIVATE);
-                SharedPreferences.Editor editor = spf.edit();
-                editor.putString("main_city_code", newCityCode);
-                editor.commit();
                 //查询新选择城市的天气情况
                 queryWeatherCode(newCityCode);
             } else {
@@ -150,7 +170,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * 根据城市代码查询天气
      * @param cityCode
      */
-    private void queryWeatherCode(String cityCode) {
+    private void queryWeatherCode(final String cityCode) {
         //http://wthrcdn.etouch.cn/WeatherApi?citykey=101010100 兰州101160101
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
@@ -177,6 +197,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Log.d("myWeather", responseStr);
                     //解析xml数据
                     todayWeather = parseXML(responseStr);
+                    //存储天气数据到sharedpreference
+                    saveWeatherToSpf(todayWeather);
+                    //存储当前城市代码
+                    SPFutils.saveStringData(MainActivity.this,"main_city_code",cityCode);
+
                     if (todayWeather != null) {
                         Log.d("myWeather", todayWeather.toString());
                         //发送消息，更新UI
@@ -194,6 +219,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             }
         }).start();
+    }
+
+    /**
+     *
+     * @param todayWeather
+     */
+    private void saveWeatherToSpf(TodayWeather todayWeather) {
+
+        SPFutils.saveStringData(this,"city",todayWeather.getCity());
+        SPFutils.saveStringData(this,"updatetime",todayWeather.getUpdatetime());
+        SPFutils.saveStringData(this,"wendu",todayWeather.getWendu());
+        SPFutils.saveStringData(this,"shidu",todayWeather.getShidu());
+        SPFutils.saveStringData(this,"pm25",todayWeather.getPm25());
+        SPFutils.saveStringData(this,"fengxiang",todayWeather.getFengxiang());
+        SPFutils.saveStringData(this,"fengli",todayWeather.getFengli());
+        SPFutils.saveStringData(this,"date",todayWeather.getDate());
+        SPFutils.saveStringData(this,"high",todayWeather.getHigh());
+        SPFutils.saveStringData(this,"low",todayWeather.getLow());
+        SPFutils.saveStringData(this,"type",todayWeather.getType());
+
     }
 
     /**
