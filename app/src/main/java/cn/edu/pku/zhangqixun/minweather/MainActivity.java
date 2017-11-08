@@ -138,6 +138,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     /**
+     * 根据城市代码查询天气
      * @param cityCode
      */
     private void queryWeatherCode(String cityCode) {
@@ -301,6 +302,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * @param pm25
      */
     private void setPM25Img(String pm25) {
+        if(pm25==null)
+        {
+            return;
+        }
         int ipm25 = Integer.parseInt(pm25);
 
         if(ipm25>=0 && ipm25<=50){
