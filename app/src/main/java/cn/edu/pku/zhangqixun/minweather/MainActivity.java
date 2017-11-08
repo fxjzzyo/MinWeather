@@ -46,18 +46,27 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.weather_info);
         //初始化控件
         initView();
+        //初始化事件
+        initEvent();
 
-        mUpdateBtn.setOnClickListener(this);
-        mCitySelect.setOnClickListener(this);
 
+
+    }
+
+    private void initEvent() {
+
+        //显示上次显示的城市
+        SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+        String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+        Log.d("myWeather", cityCode);
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
-            Log.d("myWeather", "网络OK");
-            Toast.makeText(MainActivity.this, "网络OK！", Toast.LENGTH_LONG).show();
+            queryWeatherCode(cityCode);
         } else {
-            Log.d("myWeather", "网络挂了");
             Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
         }
 
+        mUpdateBtn.setOnClickListener(this);
+        mCitySelect.setOnClickListener(this);
     }
 
     private void initView() {
