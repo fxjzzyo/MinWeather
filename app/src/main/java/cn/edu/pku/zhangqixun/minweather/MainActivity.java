@@ -42,6 +42,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
     private ProgressBar mProgressBar;
+    private String currentCity;//当前城市
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +65,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Log.d("myWeather", cityCode);
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             queryWeatherCode(cityCode);
+            //显示进度条
+            setUpdateProgressbar(true);
         } else {
             //显示本地的，上次显示的天气信息
             setWeatherFromSpf();
@@ -79,7 +82,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private void setWeatherFromSpf() {
         TodayWeather todayWeather = new TodayWeather();
-        getStringData(this,"city","北京");
+        todayWeather.setCity(getStringData(this,"city","北京"));
         todayWeather.setUpdatetime(getStringData(this,"updatetime",todayWeather.getUpdatetime()));
         todayWeather.setWendu(getStringData(this, "wendu", todayWeather.getWendu()));
         todayWeather.setShidu(getStringData(this,"shidu",todayWeather.getShidu()));
@@ -145,7 +148,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.title_city_manager:
                 Intent intent = new Intent(MainActivity.this, SelectActivity.class);
-                intent.putExtra("current_city",city_name_Tv.getText().toString());
+                intent.putExtra("current_city",currentCity);
                 startActivityForResult(intent,1);
                 break;
             default:
@@ -481,7 +484,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * @param todayWeather
      */
     private void updateTodayWeather(TodayWeather todayWeather) {
-        city_name_Tv.setText(todayWeather.getCity() + "天气");
+        currentCity = todayWeather.getCity();
+        city_name_Tv.setText(currentCity + "天气");
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime() + "发布");
         humidityTv.setText("湿度：" + todayWeather.getShidu());

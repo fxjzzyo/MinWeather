@@ -53,7 +53,7 @@ private ImageView mBackBtn;
     private void initEvent() {
         mBackBtn.setOnClickListener(this);
         String current_city = getIntent().getStringExtra("current_city");
-        mTitleCity.setText("当前城市："+current_city);
+        mTitleCity.setText("当前城市：" + current_city);
         //初始化适配器
         myAdapter = new MyAdapter(this,citys);
         //设置适配器

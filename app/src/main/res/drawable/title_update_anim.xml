@@ -4,6 +4,6 @@ android:drawable="@drawable/title_update"
     android:fromDegrees="0"
     android:pivotX="50%"
     android:pivotY="50%"
-    android:toDegrees="720"
-    android:duration="300"
+    android:toDegrees="360"
+    android:duration="100"
     />
