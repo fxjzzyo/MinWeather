@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -62,10 +63,10 @@ private ImageView mBackBtn;
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                //获取点击项对于的city
-                City city = citys.get(i);
+                City city = (City) myAdapter.getItem(i);
                 String number = city.getNumber();
                 //提示点击信息
-                Toast.makeText(SelectActivity.this,"你点击了："+city.getCity(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(SelectActivity.this,"你选择了"+city.getCity(),Toast.LENGTH_SHORT).show();
                 //将该city的code传回主界面
                 Intent intent = new Intent();
                 intent.putExtra("cityCode", number);
@@ -81,6 +82,7 @@ private ImageView mBackBtn;
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.i("tag", "text changed: " + charSequence);
                 filterData(charSequence);
                 lvTitles.setAdapter(myAdapter);
             }
@@ -94,8 +96,9 @@ private ImageView mBackBtn;
 
     private void filterData(CharSequence charSequence) {
         filterCities = new ArrayList<>();
-        if (TextUtils.isEmpty(charSequence)) {
+        if (TextUtils.isEmpty(charSequence.toString())) {
             filterCities.clear();
+            Log.i("tag", "citys length: " + citys.size());
             filterCities.addAll(citys);
         }else {
             filterCities.clear();

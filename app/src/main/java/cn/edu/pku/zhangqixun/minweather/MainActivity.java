@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
-
+    private ProgressBar mProgressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +96,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void initView() {
+        mProgressBar = (ProgressBar) findViewById(R.id.pb_update);
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
         mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
 
@@ -131,7 +133,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 Log.d("myWeather", cityCode);
                 if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                     Log.d("myWeather", "网络OK");
+                    //查询天气信息
                     queryWeatherCode(cityCode);
+                    //显示更新进度条
+                    setUpdateProgressbar(true);
+
                 } else {
                     Log.d("myWeather", "网络挂了");
                     Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
@@ -140,13 +146,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case R.id.title_city_manager:
                 Intent intent = new Intent(MainActivity.this, SelectActivity.class);
                 intent.putExtra("current_city",city_name_Tv.getText().toString());
-//                startActivity(intent);
                 startActivityForResult(intent,1);
                 break;
             default:
                 break;
         }
 
+
+    }
+
+    /**
+     * 设置进度条
+     * @param show
+     */
+    private void setUpdateProgressbar(boolean show) {
+        if (show) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mUpdateBtn.setVisibility(View.INVISIBLE);
+            mUpdateBtn.setEnabled(false);
+        }else {
+            mProgressBar.setVisibility(View.GONE);
+            mUpdateBtn.setVisibility(View.VISIBLE);
+            mUpdateBtn.setEnabled(true);
+        }
 
     }
 
@@ -157,8 +179,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.d("myWeather", "选择的城市代码为" + newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
+
                 //查询新选择城市的天气情况
                 queryWeatherCode(newCityCode);
+                //显示进度条
+                setUpdateProgressbar(true);
             } else {
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
@@ -473,6 +498,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setPM25Img(todayWeather.getPm25());
 
         Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
+
+        //隐藏进度条
+        setUpdateProgressbar(false);
     }
 
     private static final int UPDATE_TODAY_WEATHER = 1;
