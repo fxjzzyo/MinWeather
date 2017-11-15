@@ -43,8 +43,7 @@ public class MyAdapter extends BaseAdapter {
     }
 
     public void updateListView(List<City> cities) {
-        this.cities.clear();
-        this.cities.addAll(cities);
+       this.cities = cities;
         this.notifyDataSetChanged();
 
     }
