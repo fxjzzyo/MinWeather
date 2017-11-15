@@ -16,12 +16,12 @@ import cn.edu.pku.zhangqixun.minweather.R;
  * Created by fxjzzyo on 2017/11/8.
  */
 
-public class MyAdapter extends BaseAdapter{
+public class MyAdapter extends BaseAdapter {
     private List<City> cities;
     private Context mContext;
     private LayoutInflater layoutInflater;
 
-    public MyAdapter( Context context,List<City> cities) {
+    public MyAdapter(Context context, List<City> cities) {
         this.cities = cities;
         this.mContext = context;
         this.layoutInflater = layoutInflater.from(mContext);
@@ -42,9 +42,16 @@ public class MyAdapter extends BaseAdapter{
         return i;
     }
 
+    public void updateListView(List<City> cities) {
+        this.cities.clear();
+        this.cities.addAll(cities);
+        this.notifyDataSetChanged();
+
+    }
+
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        ViewHolder viewHolder= null ;
+        ViewHolder viewHolder = null;
         if (view == null) {
             viewHolder = new ViewHolder();
             //引入条目布局
@@ -54,7 +61,7 @@ public class MyAdapter extends BaseAdapter{
             viewHolder.tvCode = (TextView) view.findViewById(R.id.tv_city_code);
             //将viewHolder设置到viewTag
             view.setTag(viewHolder);
-        }else{
+        } else {
             //通过tag从view中获取viewholder
             viewHolder = (ViewHolder) view.getTag();
         }
@@ -70,7 +77,7 @@ public class MyAdapter extends BaseAdapter{
     /**
      * viewHolder类，用来持有view，提升界面刷新效率
      */
-    class ViewHolder{
+    class ViewHolder {
         TextView tvCity;
         TextView tvCode;
 

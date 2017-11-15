@@ -3,6 +3,9 @@ package cn.edu.pku.zhangqixun.minweather;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -16,6 +19,7 @@ import java.util.List;
 import cn.edu.pku.zhangqixun.adapter.MyAdapter;
 import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.City;
+import cn.edu.pku.zhangqixun.widget.ClearEiditText;
 
 public class SelectActivity extends Activity implements View.OnClickListener {
 private ImageView mBackBtn;
@@ -23,6 +27,8 @@ private ImageView mBackBtn;
     private ListView lvTitles;
     private List<City> citys;
     private MyAdapter myAdapter;
+    private ClearEiditText mClearEiditText;
+    private List<City> filterCities;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +73,41 @@ private ImageView mBackBtn;
                 SelectActivity.this.finish();
             }
         });
+        mClearEiditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                filterData(charSequence);
+                lvTitles.setAdapter(myAdapter);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+    }
+
+    private void filterData(CharSequence charSequence) {
+        filterCities = new ArrayList<>();
+        if (TextUtils.isEmpty(charSequence)) {
+            filterCities.clear();
+            filterCities.addAll(citys);
+        }else {
+            filterCities.clear();
+            for (City city :
+                    citys) {
+                if (city.getCity().indexOf(charSequence.toString()) != -1) {
+                    filterCities.add(city);
+                }
+            }
+        }
+        myAdapter.updateListView(filterCities);
+
     }
 
     private void initViews() {
@@ -74,6 +115,7 @@ private ImageView mBackBtn;
 
         mTitleCity = (TextView) findViewById(R.id.title_name);
         lvTitles = (ListView) findViewById(R.id.title_list);
+        mClearEiditText = (ClearEiditText) findViewById(R.id.cet_clear_text);
     }
 
     @Override
