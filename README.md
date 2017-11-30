@@ -1,6 +1,6 @@
 # MinWeather
 ____
 ### Welcome to MinWeather! This is a weather app powered by fxjzzyo.
-ÔËĞĞĞ§¹û£º
+è¿è¡Œæ•ˆæœï¼š
 
-![](https://github.com/fxjzzyo/MinWeather/raw/master/img/jietu_main.jpg "Ê×Ò³½ØÍ¼")
+![](https://github.com/fxjzzyo/MinWeather/raw/master/img/jietu_main.jpg "è¿è¡Œæ•ˆæœ")
