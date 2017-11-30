@@ -1,11 +1,12 @@
 package cn.edu.pku.zhangqixun.minweather;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -26,13 +27,15 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
+import cn.edu.pku.zhangqixun.fragment.WeatherForecastFragment;
 import cn.edu.pku.zhangqixun.util.NetUtil;
 import cn.edu.pku.zhangqixun.util.SPFutils;
 
 import static cn.edu.pku.zhangqixun.util.SPFutils.getStringData;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends FragmentActivity implements View.OnClickListener {
     private ImageView mUpdateBtn;
 
     private ImageView mCitySelect;
@@ -43,6 +46,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView weatherImg, pmImg;
     private ProgressBar mProgressBar;
     private String currentCity;//当前城市
+
+
+
+
+    private WeatherForecastFragment forecastFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +66,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
     }
+
+
 
     private void initEvent() {
 
@@ -75,6 +86,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         mUpdateBtn.setOnClickListener(this);
         mCitySelect.setOnClickListener(this);
+
+//        myPagerAdapter = new MyPagerAdapter();
+        //初始化forecastFragment
+        forecastFragment = WeatherForecastFragment.newInstance("", "");
+        //加载forecastFragment
+        FragmentTransaction fragmentTransaction =
+                getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.ll_fragment, forecastFragment);
+        fragmentTransaction.commit();
+
     }
 
     /**
@@ -82,7 +103,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private void setWeatherFromSpf() {
         TodayWeather todayWeather = new TodayWeather();
-        todayWeather.setCity(getStringData(this,"city","北京"));
+        todayWeather.setCity(getStringData(this,"city","北京"));//默认北京
         todayWeather.setUpdatetime(getStringData(this,"updatetime",todayWeather.getUpdatetime()));
         todayWeather.setWendu(getStringData(this, "wendu", todayWeather.getWendu()));
         todayWeather.setShidu(getStringData(this,"shidu",todayWeather.getShidu()));
@@ -115,6 +136,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv = (TextView) findViewById(R.id.climate);
         windTv = (TextView) findViewById(R.id.wind);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
+
+
+
         city_name_Tv.setText("N/A");
         cityTv.setText("N/A");
         timeTv.setText("N/A");
@@ -200,7 +224,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private void queryWeatherCode(final String cityCode) {
         //http://wthrcdn.etouch.cn/WeatherApi?citykey=101010100 兰州101160101
-        final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
+        final String address = MyApplication.URL_BASE + cityCode;
         Log.d("myWeather", address);
         new Thread(new Runnable() {
             @Override
@@ -250,7 +274,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     /**
-     *
+     *存储天气数据到sharedpreference
      * @param todayWeather
      */
     private void saveWeatherToSpf(TodayWeather todayWeather) {
@@ -358,8 +382,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 String type = xmlPullParser.getText();
                                 //设置天气类型（晴 雨...）
                                 todayWeather.setType(type);
-
-
                                 typeCount++;
                             }
                         }

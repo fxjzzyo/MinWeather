@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_week_day4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/iv_type4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_wendu4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="5°C~4°C" />
+
+        <TextView
+            android:id="@+id/tv_weather4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="多云转晴" />
+
+        <TextView
+            android:id="@+id/tv_wind4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="微风" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_week_day5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/iv_type5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_wendu5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="5°C~4°C" />
+
+        <TextView
+            android:id="@+id/tv_weather5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="多云转晴" />
+
+        <TextView
+            android:id="@+id/tv_wind5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="微风" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_week_day6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/iv_type6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_wendu6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="5°C~4°C" />
+
+        <TextView
+            android:id="@+id/tv_weather6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="多云转晴" />
+
+        <TextView
+            android:id="@+id/tv_wind6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="微风" />
+    </LinearLayout>
+</LinearLayout>

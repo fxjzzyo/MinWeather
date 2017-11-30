@@ -20,6 +20,7 @@ import java.util.List;
 import cn.edu.pku.zhangqixun.adapter.MyAdapter;
 import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.City;
+import cn.edu.pku.zhangqixun.util.CharacterParser;
 import cn.edu.pku.zhangqixun.widget.ClearEiditText;
 
 public class SelectActivity extends Activity implements View.OnClickListener {
@@ -30,11 +31,11 @@ private ImageView mBackBtn;
     private MyAdapter myAdapter;
     private ClearEiditText mClearEiditText;
     private List<City> filterCities;
+    private CharacterParser characterParser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_city);
-
 
         initViews();
         initDatas();
@@ -46,8 +47,8 @@ private ImageView mBackBtn;
         citys = new ArrayList<>();
         //从数据库读取数据
         citys = MyApplication.getInstance().getCityList();
-
-
+        //实例化汉字转拼音工具
+        characterParser = CharacterParser.getInstance();
     }
 
     private void initEvent() {
@@ -104,8 +105,18 @@ private ImageView mBackBtn;
             filterCities.clear();
             for (City city :
                     citys) {
+                //先假设输入搜索的是中文
                 if (city.getCity().indexOf(charSequence.toString()) != -1) {
                     filterCities.add(city);
+                }else {//或者输入的是拼音
+                    String city1 = city.getCity();
+                    //将城市名转为拼音
+                    String selling = characterParser.getSelling(city1);
+                    //如果输入的内容包含在城市名里，则将该城市加入
+                    if (selling.indexOf(charSequence.toString()) != -1) {
+                        filterCities.add(city);
+                    }
+
                 }
             }
         }

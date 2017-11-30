@@ -258,6 +258,17 @@
             </RelativeLayout>
         </RelativeLayout>
         <!-- 六日天气信息 -->
+
+        <!--<include layout="@layout/weather_forecast_layout" />-->
+        <LinearLayout
+            android:id="@+id/ll_fragment"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+        </LinearLayout>
+
         <!-- 广告等信息 -->
     </LinearLayout>
 </LinearLayout>

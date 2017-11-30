@@ -20,6 +20,7 @@ import cn.edu.pku.zhangqixun.db.CityDB;
 
 public class MyApplication extends Application {
     private static final String TAG = "MyAPP";
+    public static String URL_BASE = "http://wthrcdn.etouch.cn/WeatherApi?citykey=";
     private static MyApplication myApplication;
     private CityDB mCityDB;
     private List<City> cityList;
@@ -52,12 +53,12 @@ public class MyApplication extends Application {
      */
     private boolean prepareCityList() {
         cityList = mCityDB.getAllCity();
-        for (int i = 0; i < cityList.size(); i++) {
+        /*for (int i = 0; i < cityList.size(); i++) {
             String cityName = cityList.get(i).getCity();
             String cityCode = cityList.get(i).getNumber();
             Log.d(TAG, "city name: " + cityName+" city code: "+cityCode);
         }
-
+*/
         return true;
     }
 
