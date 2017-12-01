@@ -14,28 +14,33 @@
 
         <TextView
             android:id="@+id/tv_week_day4"
+            style="@style/my_text_style"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/iv_type4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="10dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
 
         <TextView
             android:id="@+id/tv_wendu4"
+            style="@style/my_text_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="5°C~4°C" />
 
         <TextView
             android:id="@+id/tv_weather4"
+            style="@style/my_text_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="多云转晴" />
 
         <TextView
             android:id="@+id/tv_wind4"
+            style="@style/my_text_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="微风" />
@@ -50,15 +55,18 @@
 
         <TextView
             android:id="@+id/tv_week_day5"
+            style="@style/my_text_style"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/iv_type5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="10dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
 
         <TextView
+            style="@style/my_text_style"
             android:id="@+id/tv_wendu5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -66,11 +74,13 @@
 
         <TextView
             android:id="@+id/tv_weather5"
+            style="@style/my_text_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="多云转晴" />
 
         <TextView
+            style="@style/my_text_style"
             android:id="@+id/tv_wind5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -85,28 +95,33 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/my_text_style"
             android:id="@+id/tv_week_day6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/iv_type6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="10dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
 
         <TextView
+            style="@style/my_text_style"
             android:id="@+id/tv_wendu6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="5°C~4°C" />
 
         <TextView
+            style="@style/my_text_style"
             android:id="@+id/tv_weather6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="多云转晴" />
 
         <TextView
+            style="@style/my_text_style"
             android:id="@+id/tv_wind6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

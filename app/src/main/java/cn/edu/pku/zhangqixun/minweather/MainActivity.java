@@ -63,8 +63,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         //初始化事件
         initEvent();
 
-
-
     }
 
 
