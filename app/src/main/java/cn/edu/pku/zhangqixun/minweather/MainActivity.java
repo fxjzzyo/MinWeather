@@ -19,13 +19,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
@@ -47,7 +42,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private ProgressBar mProgressBar;
     private String currentCity;//当前城市
 
-
+    public static String cityCode;//全局的cityCode
 
 
     private WeatherForecastFragment forecastFragment;
@@ -70,7 +65,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private void initEvent() {
 
         //显示上次显示的城市
-        String cityCode = SPFutils.getStringData(this,"main_city_code","101010100");
+         cityCode = SPFutils.getStringData(this,"main_city_code","101010100");
         Log.d("myWeather", cityCode);
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             queryWeatherCode(cityCode);
@@ -84,8 +79,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         mUpdateBtn.setOnClickListener(this);
         mCitySelect.setOnClickListener(this);
-
-//        myPagerAdapter = new MyPagerAdapter();
         //初始化forecastFragment
         forecastFragment = WeatherForecastFragment.newInstance("", "");
         //加载forecastFragment
@@ -93,6 +86,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.ll_fragment, forecastFragment);
         fragmentTransaction.commit();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
     }
 
@@ -204,7 +203,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             Log.d("myWeather", "选择的城市代码为" + newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
-
+                //记录新的城市码
+                MainActivity.cityCode = newCityCode;
                 //查询新选择城市的天气情况
                 queryWeatherCode(newCityCode);
                 //显示进度条
@@ -227,31 +227,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         new Thread(new Runnable() {
             @Override
             public void run() {
-                HttpURLConnection con = null;
                 TodayWeather todayWeather = null;
-                try {
-                    URL url = new URL(address);
-                    con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("GET");
-                    con.setConnectTimeout(8000);
-                    con.setReadTimeout(8000);
-                    InputStream in = con.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    StringBuilder response = new StringBuilder();
-                    String str;
-                    while ((str = reader.readLine()) != null) {
-                        response.append(str);
-                        Log.d("myWeather", str);
-                    }
-                    String responseStr = response.toString();
-                    Log.d("myWeather", responseStr);
+                String response = NetUtil.getFromNet(MyApplication.URL_BASE+cityCode);
+                if (!response.isEmpty()) {//如果返回不为空
                     //解析xml数据
-                    todayWeather = parseXML(responseStr);
+                    todayWeather = parseXML(response);
                     //存储天气数据到sharedpreference
                     saveWeatherToSpf(todayWeather);
                     //存储当前城市代码
                     SPFutils.saveStringData(MainActivity.this,"main_city_code",cityCode);
-
                     if (todayWeather != null) {
                         Log.d("myWeather", todayWeather.toString());
                         //发送消息，更新UI
@@ -260,13 +244,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                         msg.obj = todayWeather;
                         mHandler.sendMessage(msg);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (con != null) {
-                        con.disconnect();
-                    }
+                }else {
+                    Message msg = new Message();
+                    msg.what = UPDATE_FAILED;
+                    mHandler.sendMessage(msg);
                 }
+
+
+
             }
         }).start();
     }
@@ -512,7 +497,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         pmDataTv.setText(todayWeather.getPm25());
         pmQualityTv.setText(todayWeather.getQuality());
         weekTv.setText(todayWeather.getDate());
-        temperatureTv.setText(todayWeather.getHigh() + "~" + todayWeather.getLow());
+        temperatureTv.setText( todayWeather.getLow()+ "~" +todayWeather.getHigh() );
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:" + todayWeather.getFengli());
 
@@ -523,16 +508,21 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
 
-        //隐藏进度条
-        setUpdateProgressbar(false);
+
     }
 
     private static final int UPDATE_TODAY_WEATHER = 1;
+    private static final int UPDATE_FAILED = 0;
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
+            //隐藏进度条
+            setUpdateProgressbar(false);
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
+                    break;
+                case UPDATE_FAILED:
+                    Toast.makeText(MainActivity.this,"请求失败！",Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;

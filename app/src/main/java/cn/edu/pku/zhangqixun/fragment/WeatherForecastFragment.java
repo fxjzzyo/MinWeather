@@ -17,7 +17,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import cn.edu.pku.zhangqixun.adapter.MyPagerAdapter;
+import cn.edu.pku.zhangqixun.adapter.MyPagerFragmentAdapter;
 import cn.edu.pku.zhangqixun.minweather.R;
 
 /**
@@ -37,7 +37,7 @@ public class WeatherForecastFragment extends Fragment {
     ImageView ivDot2;
     Unbinder unbinder;
 
-    private MyPagerAdapter myPagerAdapter;
+    private MyPagerFragmentAdapter myPagerFragmentAdapter;
     private List<Fragment> fragments;
 
     private String mParam1;
@@ -99,13 +99,13 @@ public class WeatherForecastFragment extends Fragment {
         fragments.add(ForecastFragment1.newInstance("", ""));
         fragments.add(ForecastFragment2.newInstance("", ""));
         //初始化myPagerAdapter
-        myPagerAdapter = new MyPagerAdapter(getChildFragmentManager(),fragments);
+        myPagerFragmentAdapter = new MyPagerFragmentAdapter(getChildFragmentManager(),fragments);
 
     }
 
     private void initEvent() {
         //为viewpager设置适配器
-        vp.setAdapter(myPagerAdapter);
+        vp.setAdapter(myPagerFragmentAdapter);
         //为viewpager添加滑动监听
         vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

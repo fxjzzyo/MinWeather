@@ -28,6 +28,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.ForecastWeather;
+import cn.edu.pku.zhangqixun.minweather.MainActivity;
 import cn.edu.pku.zhangqixun.minweather.R;
 import cn.edu.pku.zhangqixun.util.MyUtils;
 import cn.edu.pku.zhangqixun.util.NetUtil;
@@ -122,13 +123,14 @@ public class ForecastFragment1 extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initDatas();
-        initEvent();
 
     }
 
-    private void initEvent() {
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        initDatas();
     }
 
     private void initDatas() {
@@ -137,12 +139,10 @@ public class ForecastFragment1 extends Fragment {
     }
 
     private void queryWeatherFromNet() {
-        final String cityCode = SPFutils.getStringData(getActivity(),"main_city_code","101010100");
-        Log.i("tag", "citycode: " + cityCode);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String response = NetUtil.getFromNet(MyApplication.URL_BASE+cityCode);
+                String response = NetUtil.getFromNet(MyApplication.URL_BASE+ MainActivity.cityCode);
                 Message message = new Message();
                 if (response.isEmpty()) {
                     //请求失败

@@ -31,7 +31,8 @@ import cn.edu.pku.zhangqixun.bean.ForecastWeather;
 import cn.edu.pku.zhangqixun.minweather.R;
 import cn.edu.pku.zhangqixun.util.MyUtils;
 import cn.edu.pku.zhangqixun.util.NetUtil;
-import cn.edu.pku.zhangqixun.util.SPFutils;
+
+import static cn.edu.pku.zhangqixun.minweather.MainActivity.cityCode;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -117,12 +118,13 @@ public class ForecastFragment2 extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initDatas();
-        initEvent();
 
     }
-    private void initEvent() {
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        initDatas();
     }
 
     private void initDatas() {
@@ -131,12 +133,10 @@ public class ForecastFragment2 extends Fragment {
     }
 
     private void queryWeatherFromNet() {
-        final String cityCode = SPFutils.getStringData(getActivity(),"main_city_code","101010100");
-        Log.i("tag", "citycode: " + cityCode);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String response = NetUtil.getFromNet(MyApplication.URL_BASE+cityCode);
+                String response = NetUtil.getFromNet(MyApplication.URL_BASE+ cityCode);
                 Message message = new Message();
                 if (response.isEmpty()) {
                     //请求失败
@@ -222,6 +222,7 @@ public class ForecastFragment2 extends Fragment {
         ForecastWeather weather1 =null;
         ForecastWeather weather2=null;
         ForecastWeather weather3=null;
+        int fore4 = 3,fore5 = 4,fore6 =5;//标识预测的第4,5,6天
         int index = 0;//记录预测的天数，第几天
         try {
             XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
@@ -239,12 +240,13 @@ public class ForecastFragment2 extends Fragment {
                         String name = xmlPullParser.getName();
                         switch (name) {
                             case "weather":
-                                if (index == 0) {
+                                index++;//预测天数加一
+                                if (index == fore4) {
                                     weather1 = new ForecastWeather();
-                                }else if(index == 1)
+                                }else if(index == fore5)
                                 {
                                     weather2 = new ForecastWeather();
-                                } else if (index == 2) {
+                                } else if (index == fore6) {
                                     weather3 = new ForecastWeather();
                                 }
 
@@ -252,48 +254,48 @@ public class ForecastFragment2 extends Fragment {
                             case "date":
                                 eventType = xmlPullParser.next();
                                 String date = xmlPullParser.getText();
-                                if (index == 0) {
+                                if (index == fore4) {
                                     weather1.setDate(date);
-                                }else if(index == 1)
+                                }else if(index == fore5)
                                 {
                                     weather2.setDate(date);
-                                } else if (index == 2) {
+                                } else if (index == fore6) {
                                     weather3.setDate(date);
                                 }
                                 break;
                             case "high":
                                 eventType = xmlPullParser.next();
                                 String high = xmlPullParser.getText();
-                                if (index == 0) {
+                                if (index == fore4) {
                                     weather1.setHigh(high);
-                                }else if(index == 1)
+                                }else if(index == fore5)
                                 {
                                     weather2.setHigh(high);
-                                }else if (index == 2) {
+                                }else if (index == fore6) {
                                     weather3.setHigh(high);
                                 }
                                 break;
                             case "low":
                                 eventType = xmlPullParser.next();
                                 String low = xmlPullParser.getText();
-                                if (index == 0) {
+                                if (index == fore4) {
                                     weather1.setLow(low);
-                                }else if(index == 1)
+                                }else if(index == fore5)
                                 {
                                     weather2.setLow(low);
-                                }else if (index == 2) {
+                                }else if (index == fore6) {
                                     weather3.setLow(low);
                                 }
                                 break;
                             case "type":
                                 eventType = xmlPullParser.next();
                                 String type = xmlPullParser.getText();
-                                if (index == 0) {
+                                if (index == fore4) {
                                     weather1.setType(type);
-                                }else if(index == 1)
+                                }else if(index == fore5)
                                 {
                                     weather2.setType(type);
-                                }else if (index == 2) {
+                                }else if (index == fore6) {
                                     weather3.setType(type);
                                 }
                                 break;
@@ -301,12 +303,12 @@ public class ForecastFragment2 extends Fragment {
                                 eventType = xmlPullParser.next();
                                 if (weather1 != null) {
                                     String fengli = xmlPullParser.getText();
-                                    if (index == 0) {
+                                    if (index == fore4) {
                                         weather1.setFengli(fengli);
-                                    }else if(index == 1)
+                                    }else if(index == fore5)
                                     {
                                         weather2.setFengli(fengli);
-                                    }else if (index == 2) {
+                                    }else if (index == fore6) {
                                         weather3.setFengli(fengli);
                                     }
                                 }
@@ -322,18 +324,15 @@ public class ForecastFragment2 extends Fragment {
                             switch (endTag) {
                                 case "weather":
                                     //添加预测天气
-                                    if (index == 0) {
+                                    if (index == fore4) {
                                         Log.i("tag", "we1: " + weather1.toString());
                                         forecastWeathers.add(weather1);
-                                        index++;//预测天数加一
-                                    }else if(index == 1)
+                                    }else if(index == fore5)
                                     {
                                         Log.i("tag", "we2: " + weather2.toString());
                                         forecastWeathers.add(weather2);
-                                        index++;//预测天数加一
-                                    }else if (index == 2) {
+                                    }else if (index == fore6) {
                                         forecastWeathers.add(weather3);
-                                        index++;//预测天数加一
                                     }
                                     break;
                             }
