@@ -32,9 +32,7 @@ import static cn.edu.pku.zhangqixun.util.SPFutils.getStringData;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
     private ImageView mUpdateBtn;
-
     private ImageView mCitySelect;
-
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
             pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
@@ -44,7 +42,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     public static String cityCode;//全局的cityCode
 
-
+    //未来天气预测的fragment
     private WeatherForecastFragment forecastFragment;
 
     @Override
@@ -93,6 +91,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     protected void onResume() {
         super.onResume();
 
+
     }
 
     /**
@@ -116,6 +115,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     }
 
+    /**
+     * 初始化控件
+     */
     private void initView() {
         mProgressBar = (ProgressBar) findViewById(R.id.pb_update);
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
@@ -494,7 +496,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime() + "发布");
         humidityTv.setText("湿度：" + todayWeather.getShidu());
-        pmDataTv.setText(todayWeather.getPm25());
+        if (todayWeather.getPm25() == null) {//当pm2.5没有值时，显示未知
+            pmDataTv.setText("未知");
+        }else {
+            pmDataTv.setText(todayWeather.getPm25());
+        }
         pmQualityTv.setText(todayWeather.getQuality());
         weekTv.setText(todayWeather.getDate());
         temperatureTv.setText( todayWeather.getLow()+ "~" +todayWeather.getHigh() );

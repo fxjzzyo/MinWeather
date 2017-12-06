@@ -43,6 +43,19 @@ public class ForecastFragment2 extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    @BindView(R.id.tv_week_day3)
+    TextView tvWeekDay3;
+    @BindView(R.id.iv_type3)
+    ImageView ivType3;
+    @BindView(R.id.tv_wendu3)
+    TextView tvWendu3;
+    @BindView(R.id.tv_weather3)
+    TextView tvWeather3;
+    @BindView(R.id.tv_wind3)
+    TextView tvWind3;
+
+
     @BindView(R.id.tv_week_day4)
     TextView tvWeekDay4;
     @BindView(R.id.iv_type4)
@@ -53,26 +66,7 @@ public class ForecastFragment2 extends Fragment {
     TextView tvWeather4;
     @BindView(R.id.tv_wind4)
     TextView tvWind4;
-    @BindView(R.id.tv_week_day5)
-    TextView tvWeekDay5;
-    @BindView(R.id.iv_type5)
-    ImageView ivType5;
-    @BindView(R.id.tv_wendu5)
-    TextView tvWendu5;
-    @BindView(R.id.tv_weather5)
-    TextView tvWeather5;
-    @BindView(R.id.tv_wind5)
-    TextView tvWind5;
-    @BindView(R.id.tv_week_day6)
-    TextView tvWeekDay6;
-    @BindView(R.id.iv_type6)
-    ImageView ivType6;
-    @BindView(R.id.tv_wendu6)
-    TextView tvWendu6;
-    @BindView(R.id.tv_weather6)
-    TextView tvWeather6;
-    @BindView(R.id.tv_wind6)
-    TextView tvWind6;
+
     Unbinder unbinder;
     private String mParam1;
     private String mParam2;
@@ -186,31 +180,25 @@ public class ForecastFragment2 extends Fragment {
      * 设置数据到控件
      */
     private void setDatas() {
-        ForecastWeather yesterday = forecastWeathers.get(0);
-        tvWeekDay4.setText(yesterday.getDate());
-        tvWendu4.setText(yesterday.getLow()+"~"+yesterday.getHigh());
-        tvWeather4.setText(yesterday.getType());
-        tvWind4.setText(yesterday.getFengli());
 
-        ForecastWeather weather1 = forecastWeathers.get(1);
-        tvWeekDay5.setText(weather1.getDate());
-        tvWendu5.setText(weather1.getLow()+"~"+weather1.getHigh());
-        tvWeather5.setText(weather1.getType());
-        tvWind5.setText(weather1.getFengli());
+        ForecastWeather weather3 = forecastWeathers.get(0);
+        tvWeekDay3.setText(weather3.getDate());
+        tvWendu3.setText(weather3.getLow()+"~"+weather3.getHigh());
+        tvWeather3.setText(weather3.getType());
+        tvWind3.setText(weather3.getFengli());
 
-        ForecastWeather weather2 = forecastWeathers.get(2);
-        tvWeekDay6.setText(weather2.getDate());
-        tvWendu6.setText(weather2.getLow()+"~"+weather2.getHigh());
-        tvWeather6.setText(weather2.getType());
-        tvWind6.setText(weather2.getFengli());
+        ForecastWeather weather4 = forecastWeathers.get(1);
+        tvWeekDay4.setText(weather4.getDate());
+        tvWendu4.setText(weather4.getLow()+"~"+weather4.getHigh());
+        tvWeather4.setText(weather4.getType());
+        tvWind4.setText(weather4.getFengli());
+
 
         //设置图片
-        String type1 = yesterday.getType();
-        String type2 = weather1.getType();
-        String type3 = weather2.getType();
-        MyUtils.setWeatherImg(ivType4,type1);
-        MyUtils.setWeatherImg(ivType5,type2);
-        MyUtils.setWeatherImg(ivType6,type3);
+        String type1 = weather3.getType();
+        String type2 = weather4.getType();
+        MyUtils.setWeatherImg(ivType3,type1);
+        MyUtils.setWeatherImg(ivType4,type2);
 
     }
     /**
@@ -222,7 +210,7 @@ public class ForecastFragment2 extends Fragment {
         ForecastWeather weather1 =null;
         ForecastWeather weather2=null;
         ForecastWeather weather3=null;
-        int fore4 = 3,fore5 = 4,fore6 =5;//标识预测的第4,5,6天
+        int fore3 = 4,fore4 = 5;//标识预测的第3,4天
         int index = 0;//记录预测的天数，第几天
         try {
             XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
@@ -241,75 +229,63 @@ public class ForecastFragment2 extends Fragment {
                         switch (name) {
                             case "weather":
                                 index++;//预测天数加一
-                                if (index == fore4) {
+                                if (index == fore3) {
                                     weather1 = new ForecastWeather();
-                                }else if(index == fore5)
+                                }else if(index == fore4)
                                 {
                                     weather2 = new ForecastWeather();
-                                } else if (index == fore6) {
-                                    weather3 = new ForecastWeather();
                                 }
 
                                 break;
                             case "date":
                                 eventType = xmlPullParser.next();
                                 String date = xmlPullParser.getText();
-                                if (index == fore4) {
+                                if (index == fore3) {
                                     weather1.setDate(date);
-                                }else if(index == fore5)
+                                }else if(index == fore4)
                                 {
                                     weather2.setDate(date);
-                                } else if (index == fore6) {
-                                    weather3.setDate(date);
                                 }
                                 break;
                             case "high":
                                 eventType = xmlPullParser.next();
                                 String high = xmlPullParser.getText();
-                                if (index == fore4) {
+                                if (index == fore3) {
                                     weather1.setHigh(high);
-                                }else if(index == fore5)
+                                }else if(index == fore4)
                                 {
                                     weather2.setHigh(high);
-                                }else if (index == fore6) {
-                                    weather3.setHigh(high);
                                 }
                                 break;
                             case "low":
                                 eventType = xmlPullParser.next();
                                 String low = xmlPullParser.getText();
-                                if (index == fore4) {
+                                if (index == fore3) {
                                     weather1.setLow(low);
-                                }else if(index == fore5)
+                                }else if(index == fore4)
                                 {
                                     weather2.setLow(low);
-                                }else if (index == fore6) {
-                                    weather3.setLow(low);
                                 }
                                 break;
                             case "type":
                                 eventType = xmlPullParser.next();
                                 String type = xmlPullParser.getText();
-                                if (index == fore4) {
+                                if (index == fore3) {
                                     weather1.setType(type);
-                                }else if(index == fore5)
+                                }else if(index == fore4)
                                 {
                                     weather2.setType(type);
-                                }else if (index == fore6) {
-                                    weather3.setType(type);
                                 }
                                 break;
                             case "fengli":
                                 eventType = xmlPullParser.next();
                                 if (weather1 != null) {
                                     String fengli = xmlPullParser.getText();
-                                    if (index == fore4) {
+                                    if (index == fore3) {
                                         weather1.setFengli(fengli);
-                                    }else if(index == fore5)
+                                    }else if(index == fore4)
                                     {
                                         weather2.setFengli(fengli);
-                                    }else if (index == fore6) {
-                                        weather3.setFengli(fengli);
                                     }
                                 }
 
@@ -324,15 +300,13 @@ public class ForecastFragment2 extends Fragment {
                             switch (endTag) {
                                 case "weather":
                                     //添加预测天气
-                                    if (index == fore4) {
+                                    if (index == fore3) {
                                         Log.i("tag", "we1: " + weather1.toString());
                                         forecastWeathers.add(weather1);
-                                    }else if(index == fore5)
+                                    }else if(index == fore4)
                                     {
                                         Log.i("tag", "we2: " + weather2.toString());
                                         forecastWeathers.add(weather2);
-                                    }else if (index == fore6) {
-                                        forecastWeathers.add(weather3);
                                     }
                                     break;
                             }
