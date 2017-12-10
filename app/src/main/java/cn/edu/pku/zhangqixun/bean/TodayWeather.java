@@ -1,10 +1,12 @@
 package cn.edu.pku.zhangqixun.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by fxjzzyo on 2017/10/12.
  */
 
-public class TodayWeather {
+public class TodayWeather implements Serializable{
     private String city;
     private String updatetime;
     private String wendu;

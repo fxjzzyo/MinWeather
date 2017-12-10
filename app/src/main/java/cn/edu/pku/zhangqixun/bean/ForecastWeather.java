@@ -1,10 +1,12 @@
 package cn.edu.pku.zhangqixun.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by fxjzzyo on 2017/11/30.
  */
 
-public class ForecastWeather {
+public class ForecastWeather implements Serializable{
 
     private String date;
     private String type;

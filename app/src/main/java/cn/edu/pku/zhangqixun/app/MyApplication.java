@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.pku.zhangqixun.bean.City;
+import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.db.CityDB;
+import cn.edu.pku.zhangqixun.util.SPFutils;
 
 /**
  * Created by fxjzzyo on 2017/11/1.
@@ -20,7 +22,7 @@ import cn.edu.pku.zhangqixun.db.CityDB;
 
 public class MyApplication extends Application {
     private static final String TAG = "MyAPP";
-    public static String URL_BASE = "http://wthrcdn.etouch.cn/WeatherApi?citykey=";
+
     private static MyApplication myApplication;
     private CityDB mCityDB;
     private List<City> cityList;
@@ -29,6 +31,8 @@ public class MyApplication extends Application {
         super.onCreate();
         Log.d(TAG, "MyApplication--onCreate");
         this.myApplication = this;
+        //初始化城市码，默认北京
+        Global.CITY_CODE= SPFutils.getStringData(this,"main_city_code","101010100");
         mCityDB = openCityDB();
         initCityList();
     }
