@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -18,13 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 
 import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
@@ -89,8 +82,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         filter.addAction(Global.WEATHER_RECEIVED);
         registerReceiver(mBroadcastReceiver, filter);
 
-
-
         mUpdateBtn.setOnClickListener(this);
         mCitySelect.setOnClickListener(this);
         //初始化forecastFragment
@@ -118,7 +109,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             //启动查询天气的service
             startWeatherService();
-//            queryWeatherCode(cityCode);
             //显示进度条
             setUpdateProgressbar(true);
         } else {
@@ -166,7 +156,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mProgressBar = (ProgressBar) findViewById(R.id.pb_update);
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
         mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
-
         city_name_Tv = (TextView) findViewById(R.id.title_city_name);
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
@@ -180,19 +169,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         climateTv = (TextView) findViewById(R.id.climate);
         windTv = (TextView) findViewById(R.id.wind);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
-
-
-
-        city_name_Tv.setText("N/A");
-        cityTv.setText("N/A");
-        timeTv.setText("N/A");
-        humidityTv.setText("N/A");
-        pmDataTv.setText("N/A");
-        pmQualityTv.setText("N/A");
-        weekTv.setText("N/A");
-        temperatureTv.setText("N/A");
-        climateTv.setText("N/A");
-        windTv.setText("N/A");
     }
 
     /**
@@ -210,11 +186,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     Log.d("myWeather", "网络OK");
                     //启动查询天气的service
                     startWeatherService();
-                    //查询天气信息
-//                    queryWeatherCode(cityCode);
                     //显示更新进度条
                     setUpdateProgressbar(true);
-
                 } else {
                     Log.d("myWeather", "网络挂了");
                     Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
@@ -229,7 +202,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             default:
                 break;
         }
-
 
     }
 
@@ -274,173 +246,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
     }*/
 
-    /**
-     * 根据城市代码查询天气
-     * @param cityCode
-     */
-    private void queryWeatherCode(final String cityCode) {
-        //http://wthrcdn.etouch.cn/WeatherApi?citykey=101010100 兰州101160101
-        final String address = Global.URL_BASE + cityCode;
-        Log.d("myWeather", address);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                TodayWeather todayWeather = null;
-                String response = NetUtil.getFromNet(Global.URL_BASE+cityCode);
-                if (!response.isEmpty()) {//如果返回不为空
-                    //解析xml数据
-                    todayWeather = parseXML(response);
-                    //存储天气数据到sharedpreference
-                    saveWeatherToSpf(todayWeather);
-                    //存储当前城市代码
-                    SPFutils.saveStringData(MainActivity.this,"main_city_code",cityCode);
-                    if (todayWeather != null) {
-                        Log.d("myWeather", todayWeather.toString());
-                        //发送消息，更新UI
-                        Message msg = new Message();
-                        msg.what = UPDATE_TODAY_WEATHER;
-                        msg.obj = todayWeather;
-                        mHandler.sendMessage(msg);
-                    }
-                }else {
-                    Message msg = new Message();
-                    msg.what = UPDATE_FAILED;
-                    mHandler.sendMessage(msg);
-                }
-
-
-
-            }
-        }).start();
-    }
-
-    /**
-     *存储天气数据到sharedpreference
-     * @param todayWeather
-     */
-    private void saveWeatherToSpf(TodayWeather todayWeather) {
-
-        SPFutils.saveStringData(this,"city",todayWeather.getCity());
-        SPFutils.saveStringData(this,"updatetime",todayWeather.getUpdatetime());
-        SPFutils.saveStringData(this,"wendu",todayWeather.getWendu());
-        SPFutils.saveStringData(this,"shidu",todayWeather.getShidu());
-        SPFutils.saveStringData(this,"pm25",todayWeather.getPm25());
-        SPFutils.saveStringData(this,"fengxiang",todayWeather.getFengxiang());
-        SPFutils.saveStringData(this,"fengli",todayWeather.getFengli());
-        SPFutils.saveStringData(this,"date",todayWeather.getDate());
-        SPFutils.saveStringData(this,"high",todayWeather.getHigh());
-        SPFutils.saveStringData(this,"low",todayWeather.getLow());
-        SPFutils.saveStringData(this,"type",todayWeather.getType());
-
-    }
-
-    /**
-     * 解析xml数据
-     *
-     * @param xmldata
-     */
-    private TodayWeather parseXML(String xmldata) {
-        TodayWeather todayWeather = null;
-        int fengxiangCount = 0;
-        int fengliCount = 0;
-        int dateCount = 0;
-        int highCount = 0;
-        int lowCount = 0;
-        int typeCount = 0;
-        try {
-            XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
-            XmlPullParser xmlPullParser = fac.newPullParser();
-            xmlPullParser.setInput(new StringReader(xmldata));
-            int eventType = xmlPullParser.getEventType();
-            Log.d("myWeather", "parseXML");
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                switch (eventType) {
-                    // 判断当前事件是否为文档开始事件
-                    case XmlPullParser.START_DOCUMENT:
-                        break;
-                    // 判断当前事件是否为标签元素开始事件
-                    case XmlPullParser.START_TAG:
-                        if (xmlPullParser.getName().equals("resp")) {
-                            todayWeather = new TodayWeather();
-                        }
-                        if (todayWeather != null) {
-
-                            if (xmlPullParser.getName().equals("city")) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "city: " + xmlPullParser.getText());
-                                todayWeather.setCity(xmlPullParser.getText());
-                            } else if (xmlPullParser.getName().equals("updatetime")) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "updatetime: " + xmlPullParser.getText());
-                                todayWeather.setUpdatetime(xmlPullParser.getText());
-                            } else if (xmlPullParser.getName().equals("shidu")) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "shidu: " + xmlPullParser.getText());
-                                todayWeather.setShidu(xmlPullParser.getText());
-                            } else if (xmlPullParser.getName().equals("wendu")) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "wendu: " + xmlPullParser.getText());
-                                todayWeather.setWendu(xmlPullParser.getText());
-                            } else if (xmlPullParser.getName().equals("pm25")) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "pm25: " + xmlPullParser.getText());
-                                String pm25 = xmlPullParser.getText();
-                                //设置pm2.5
-                                todayWeather.setPm25(pm25);
-
-                            } else if (xmlPullParser.getName().equals("quality")) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "quality: " + xmlPullParser.getText());
-                                todayWeather.setQuality(xmlPullParser.getText());
-                            } else if (xmlPullParser.getName().equals("fengxiang") && fengxiangCount == 0) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "fengxiang: " + xmlPullParser.getText());
-                                todayWeather.setFengxiang(xmlPullParser.getText());
-                                fengxiangCount++;
-                            } else if (xmlPullParser.getName().equals("fengli") && fengliCount == 0) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "fengli: " + xmlPullParser.getText());
-                                todayWeather.setFengli(xmlPullParser.getText());
-                                fengliCount++;
-                            } else if (xmlPullParser.getName().equals("date") && dateCount == 0) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "date: " + xmlPullParser.getText());
-                                todayWeather.setDate(xmlPullParser.getText());
-                                dateCount++;
-                            } else if (xmlPullParser.getName().equals("high") && highCount == 0) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "high: " + xmlPullParser.getText());
-                                todayWeather.setHigh(xmlPullParser.getText());
-                                highCount++;
-                            } else if (xmlPullParser.getName().equals("low") && lowCount == 0) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "low: " + xmlPullParser.getText());
-                                todayWeather.setLow(xmlPullParser.getText());
-                                lowCount++;
-                            } else if (xmlPullParser.getName().equals("type") && typeCount == 0) {
-                                eventType = xmlPullParser.next();
-                                Log.d("myWeather", "type: " + xmlPullParser.getText());
-                                String type = xmlPullParser.getText();
-                                //设置天气类型（晴 雨...）
-                                todayWeather.setType(type);
-                                typeCount++;
-                            }
-                        }
-                        break;
-                    // 判断当前事件是否为标签元素结束事件
-                    case XmlPullParser.END_TAG:
-                        break;
-                }
-                // 进入下一个元素并触发相应事件
-                eventType = xmlPullParser.next();
-            }
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return todayWeather;
-    }
 
     /**
      * 根据pm2.5的值设置图片
@@ -571,28 +376,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         setWeatherImg(todayWeather.getType());
         //设置pm2.5的图片
         setPM25Img(todayWeather.getPm25());
-
         Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
 
-
     }
-
-    private static final int UPDATE_TODAY_WEATHER = 1;
-    private static final int UPDATE_FAILED = 0;
-    private Handler mHandler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
-            //隐藏进度条
-            setUpdateProgressbar(false);
-            switch (msg.what) {
-                case UPDATE_TODAY_WEATHER:
-                    updateTodayWeather((TodayWeather) msg.obj);
-                    break;
-                case UPDATE_FAILED:
-                    Toast.makeText(MainActivity.this,"请求失败！",Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 }
