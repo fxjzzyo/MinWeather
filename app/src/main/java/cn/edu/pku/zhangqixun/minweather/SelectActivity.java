@@ -1,7 +1,6 @@
 package cn.edu.pku.zhangqixun.minweather;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -20,6 +19,7 @@ import java.util.List;
 import cn.edu.pku.zhangqixun.adapter.MyAdapter;
 import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.City;
+import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.util.CharacterParser;
 import cn.edu.pku.zhangqixun.widget.ClearEiditText;
 
@@ -69,11 +69,14 @@ private ImageView mBackBtn;
                 String number = city.getNumber();
                 //提示点击信息
                 Toast.makeText(SelectActivity.this,"你选择了"+city.getCity(),Toast.LENGTH_SHORT).show();
+                //记录当前选择的城市码
+                Global.CITY_CODE = number;
+                SelectActivity.this.finish();
                 //将该city的code传回主界面
-                Intent intent = new Intent();
+             /*   Intent intent = new Intent();
                 intent.putExtra("cityCode", number);
                 setResult(RESULT_OK, intent);
-                SelectActivity.this.finish();
+                SelectActivity.this.finish();*/
             }
         });
         mClearEiditText.addTextChangedListener(new TextWatcher() {

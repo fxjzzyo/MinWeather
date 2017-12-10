@@ -1,6 +1,9 @@
 package cn.edu.pku.zhangqixun.minweather;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,11 +23,14 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 
-import cn.edu.pku.zhangqixun.app.MyApplication;
+import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
+import cn.edu.pku.zhangqixun.bean.WeatherInfo;
 import cn.edu.pku.zhangqixun.fragment.WeatherForecastFragment;
+import cn.edu.pku.zhangqixun.service.MyService;
 import cn.edu.pku.zhangqixun.util.NetUtil;
 import cn.edu.pku.zhangqixun.util.SPFutils;
 
@@ -33,14 +39,16 @@ import static cn.edu.pku.zhangqixun.util.SPFutils.getStringData;
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
     private ImageView mUpdateBtn;
     private ImageView mCitySelect;
-    private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
+    private TextView cityTv, timeTv, humidityTv,tvWendu,weekTv, pmDataTv,
             pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
     private ProgressBar mProgressBar;
     private String currentCity;//当前城市
 
-    public static String cityCode;//全局的cityCode
+//    public static String cityCode;//全局的cityCode
+
+    public BroadcastReceiver mBroadcastReceiver;//天气信息广播接收器
 
     //未来天气预测的fragment
     private WeatherForecastFragment forecastFragment;
@@ -61,19 +69,27 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 
     private void initEvent() {
+        //注册广播
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Serializable weather = intent.getSerializableExtra("weather");
+                if (weather == null) {
+                    Toast.makeText(MainActivity.this,"请求失败！",Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    TodayWeather todayWeather = ((WeatherInfo) weather).getTodayWeather();
+                    updateTodayWeather(todayWeather);
+                }
+                //关闭进度条
+                setUpdateProgressbar(false);
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Global.WEATHER_RECEIVED);
+        registerReceiver(mBroadcastReceiver, filter);
 
-        //显示上次显示的城市
-         cityCode = SPFutils.getStringData(this,"main_city_code","101010100");
-        Log.d("myWeather", cityCode);
-        if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
-            queryWeatherCode(cityCode);
-            //显示进度条
-            setUpdateProgressbar(true);
-        } else {
-            //显示本地的，上次显示的天气信息
-            setWeatherFromSpf();
-            Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
-        }
+
 
         mUpdateBtn.setOnClickListener(this);
         mCitySelect.setOnClickListener(this);
@@ -87,11 +103,39 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     }
 
+    /**
+     * 启动查询天气的service
+     */
+    private void startWeatherService() {
+        Intent intent = new Intent(this, MyService.class);
+        startService(intent);
+
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+            //启动查询天气的service
+            startWeatherService();
+//            queryWeatherCode(cityCode);
+            //显示进度条
+            setUpdateProgressbar(true);
+        } else {
+            //显示本地的，上次显示的天气信息
+            setWeatherFromSpf();
+            //还原上次选择的城市码
+            Global.CITY_CODE= SPFutils.getStringData(this,"main_city_code","101010100");
+            Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+        }
 
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver);
+        stopService(new Intent(this, MyService.class));
     }
 
     /**
@@ -127,6 +171,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
         humidityTv = (TextView) findViewById(R.id.humidity);
+        tvWendu = (TextView) findViewById(R.id.tv_wendu);
         weekTv = (TextView) findViewById(R.id.week_today);
         pmDataTv = (TextView) findViewById(R.id.pm_data);
         pmQualityTv = (TextView) findViewById(R.id.pm2_5_quality);
@@ -150,6 +195,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         windTv.setText("N/A");
     }
 
+    /**
+     * 点击事件
+     * @param view
+     */
     @Override
     public void onClick(View view) {
         switch (view.getId()){
@@ -159,8 +208,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 Log.d("myWeather", cityCode);
                 if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                     Log.d("myWeather", "网络OK");
+                    //启动查询天气的service
+                    startWeatherService();
                     //查询天气信息
-                    queryWeatherCode(cityCode);
+//                    queryWeatherCode(cityCode);
                     //显示更新进度条
                     setUpdateProgressbar(true);
 
@@ -169,10 +220,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
                 }
                 break;
-            case R.id.title_city_manager:
+            case R.id.title_city_manager://跳到城市选择页
                 Intent intent = new Intent(MainActivity.this, SelectActivity.class);
                 intent.putExtra("current_city",currentCity);
-                startActivityForResult(intent,1);
+                startActivity(intent);
+//                startActivityForResult(intent,1);
                 break;
             default:
                 break;
@@ -198,7 +250,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     }
 
-    @Override
+  /**
+   * 已不需要onActivityResult的方式来获取选择的城市，因为在城市选择页已经设定了全局的城市选择码
+   * 而且onResume时会重新启动service查询，所以不需要在这里再次请求
+  @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode = data.getStringExtra("cityCode");
@@ -206,9 +261,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
                 //记录新的城市码
-                MainActivity.cityCode = newCityCode;
+                Global.CITY_CODE = newCityCode;
+                startWeatherService();
                 //查询新选择城市的天气情况
-                queryWeatherCode(newCityCode);
+//                queryWeatherCode(newCityCode);
                 //显示进度条
                 setUpdateProgressbar(true);
             } else {
@@ -216,7 +272,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
             }
         }
-    }
+    }*/
 
     /**
      * 根据城市代码查询天气
@@ -224,13 +280,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private void queryWeatherCode(final String cityCode) {
         //http://wthrcdn.etouch.cn/WeatherApi?citykey=101010100 兰州101160101
-        final String address = MyApplication.URL_BASE + cityCode;
+        final String address = Global.URL_BASE + cityCode;
         Log.d("myWeather", address);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 TodayWeather todayWeather = null;
-                String response = NetUtil.getFromNet(MyApplication.URL_BASE+cityCode);
+                String response = NetUtil.getFromNet(Global.URL_BASE+cityCode);
                 if (!response.isEmpty()) {//如果返回不为空
                     //解析xml数据
                     todayWeather = parseXML(response);
@@ -418,6 +474,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      * @param type
      */
     private void setWeatherImg(String type) {
+        if (type == null) {
+            return;
+        }
         switch (type) {
             case "晴":
                 weatherImg.setImageResource(R.drawable.biz_plugin_weather_qing);
@@ -496,6 +555,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime() + "发布");
         humidityTv.setText("湿度：" + todayWeather.getShidu());
+        tvWendu.setText("温度：" + todayWeather.getWendu()+"°C");
         if (todayWeather.getPm25() == null) {//当pm2.5没有值时，显示未知
             pmDataTv.setText("未知");
         }else {

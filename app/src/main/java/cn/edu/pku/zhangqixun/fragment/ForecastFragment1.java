@@ -1,6 +1,10 @@
 package cn.edu.pku.zhangqixun.fragment;
 
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +31,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.ForecastWeather;
-import cn.edu.pku.zhangqixun.minweather.MainActivity;
+import cn.edu.pku.zhangqixun.bean.Global;
+import cn.edu.pku.zhangqixun.bean.WeatherInfo;
 import cn.edu.pku.zhangqixun.minweather.R;
 import cn.edu.pku.zhangqixun.util.MyUtils;
 import cn.edu.pku.zhangqixun.util.NetUtil;
@@ -69,7 +74,7 @@ public class ForecastFragment1 extends Fragment {
     private String mParam2;
 
     private List<ForecastWeather> forecastWeathers;
-
+    public BroadcastReceiver mBroadcastReceiver;//天气信息广播接收器
 
     public ForecastFragment1() {
         // Required empty public constructor
@@ -113,6 +118,24 @@ public class ForecastFragment1 extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        //注册广播
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Serializable weather = intent.getSerializableExtra("weather");
+                if (weather == null) {
+                    Toast.makeText(getActivity(),"请求失败！",Toast.LENGTH_SHORT).show();
+                }
+                else {
+                     forecastWeathers = ((WeatherInfo) weather).getForecastWeathers();
+                    setDatas();
+                }
+
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Global.WEATHER_RECEIVED);
+        getActivity().registerReceiver(mBroadcastReceiver, filter);
 
     }
 
@@ -120,7 +143,7 @@ public class ForecastFragment1 extends Fragment {
     public void onResume() {
         super.onResume();
 
-        initDatas();
+//        initDatas();
     }
 
     private void initDatas() {
@@ -132,7 +155,7 @@ public class ForecastFragment1 extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String response = NetUtil.getFromNet(MyApplication.URL_BASE+ MainActivity.cityCode);
+                String response = NetUtil.getFromNet(Global.URL_BASE+ Global.CITY_CODE);
                 Message message = new Message();
                 if (response.isEmpty()) {
                     //请求失败
@@ -182,25 +205,28 @@ public class ForecastFragment1 extends Fragment {
      * 设置数据到控件
      */
     private void setDatas() {
-        ForecastWeather weather1 = forecastWeathers.get(0);
-        tvWeekDay1.setText(weather1.getDate());
-        tvWendu1.setText(weather1.getLow()+"~"+weather1.getHigh());
-        tvWeather1.setText(weather1.getType());
-        tvWind1.setText(weather1.getFengli());
+        if (forecastWeathers != null) {
+            ForecastWeather weather1 = forecastWeathers.get(0);
+            tvWeekDay1.setText(weather1.getDate());
+            tvWendu1.setText(weather1.getLow()+"~"+weather1.getHigh());
+            tvWeather1.setText(weather1.getType());
+            tvWind1.setText(weather1.getFengli());
 
-        ForecastWeather weather2 = forecastWeathers.get(1);
-        tvWeekDay2.setText(weather2.getDate());
-        tvWendu2.setText(weather2.getLow()+"~"+weather2.getHigh());
-        tvWeather2.setText(weather2.getType());
-        tvWind2.setText(weather2.getFengli());
+            ForecastWeather weather2 = forecastWeathers.get(1);
+            tvWeekDay2.setText(weather2.getDate());
+            tvWendu2.setText(weather2.getLow()+"~"+weather2.getHigh());
+            tvWeather2.setText(weather2.getType());
+            tvWind2.setText(weather2.getFengli());
 
 
 
-        //设置图片
-        String type1 = weather1.getType();
-        String type2 = weather2.getType();
-        MyUtils.setWeatherImg(ivType1,type1);
-        MyUtils.setWeatherImg(ivType2,type2);
+            //设置图片
+            String type1 = weather1.getType();
+            String type2 = weather2.getType();
+            MyUtils.setWeatherImg(ivType1,type1);
+            MyUtils.setWeatherImg(ivType2,type2);
+        }
+
 
     }
 
@@ -333,5 +359,6 @@ public class ForecastFragment1 extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+       getActivity().unregisterReceiver(mBroadcastReceiver);
     }
 }
