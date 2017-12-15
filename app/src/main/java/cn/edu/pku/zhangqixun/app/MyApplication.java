@@ -24,7 +24,7 @@ public class MyApplication extends Application {
     private static final String TAG = "MyAPP";
 
     private static MyApplication myApplication;
-    private CityDB mCityDB;
+    public CityDB mCityDB;
     private List<City> cityList;
     @Override
     public void onCreate() {

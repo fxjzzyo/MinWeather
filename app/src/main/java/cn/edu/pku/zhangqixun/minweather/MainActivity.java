@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -17,8 +16,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.umeng.analytics.MobclickAgent;
+
 import java.io.Serializable;
 
+import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
 import cn.edu.pku.zhangqixun.bean.WeatherInfo;
@@ -35,12 +41,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private TextView cityTv, timeTv, humidityTv,tvWendu,weekTv, pmDataTv,
             pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
-    private ImageView weatherImg, pmImg;
+    private ImageView weatherImg, pmImg,ivLocation;
     private ProgressBar mProgressBar;
     private String currentCity;//当前城市
 
-//    public static String cityCode;//全局的cityCode
-
+    private LocationClient mLocationClient;//定位SDK的核心类
+    private MyLocationListener mMyLocationListener;//定位回调接口
     public BroadcastReceiver mBroadcastReceiver;//天气信息广播接收器
 
     //未来天气预测的fragment
@@ -52,6 +58,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         //去掉标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.weather_info);
+        mLocationClient = new LocationClient(getApplicationContext());
         //初始化控件
         initView();
         //初始化事件
@@ -62,6 +69,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 
     private void initEvent() {
+        InitLocation();//初始化百度地图
+        mMyLocationListener = new MyLocationListener();
+        mLocationClient.registerLocationListener(mMyLocationListener);
         //注册广播
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -84,6 +94,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         mUpdateBtn.setOnClickListener(this);
         mCitySelect.setOnClickListener(this);
+        ivLocation.setOnClickListener(this);
         //初始化forecastFragment
         forecastFragment = WeatherForecastFragment.newInstance("", "");
         //加载forecastFragment
@@ -94,6 +105,17 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     }
 
+    /**
+     * 初始化百度地图
+     */
+    private void InitLocation(){
+        LocationClientOption option = new LocationClientOption();
+        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);//设置高精度定位定位模式
+        option.setCoorType("bd09ll");//设置百度经纬度坐标系格式
+        option.setScanSpan(1000);//设置发起定位请求的间隔时间为1000ms
+        option.setIsNeedAddress(true);//反编译获得具体位置，只有网络定位才可以
+        mLocationClient.setLocOption(option);
+    }
     /**
      * 启动查询天气的service
      */
@@ -106,6 +128,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         super.onResume();
+        MobclickAgent.onResume(this);
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             //启动查询天气的service
             startWeatherService();
@@ -126,6 +149,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onDestroy();
         unregisterReceiver(mBroadcastReceiver);
         stopService(new Intent(this, MyService.class));
+        mLocationClient.stop();
     }
 
     /**
@@ -157,6 +181,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
         mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
         city_name_Tv = (TextView) findViewById(R.id.title_city_name);
+        ivLocation = (ImageView) findViewById(R.id.title_location);
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
         humidityTv = (TextView) findViewById(R.id.humidity);
@@ -198,6 +223,17 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 intent.putExtra("current_city",currentCity);
                 startActivity(intent);
 //                startActivityForResult(intent,1);
+                break;
+            case R.id.title_location://定位
+                if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+                    //开始定位
+                    mLocationClient.start();
+                    //显示更新进度条
+                    setUpdateProgressbar(true);
+                } else {
+                    Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+                }
+
                 break;
             default:
                 break;
@@ -378,5 +414,56 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         setPM25Img(todayWeather.getPm25());
         Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
 
+    }
+    /**
+     * 实现定位回调监听
+     */
+    public class MyLocationListener implements BDLocationListener {
+
+        public void onReceiveLocation(BDLocation location) {
+            //隐藏更新进度条
+            setUpdateProgressbar(false);
+            //打印出当前位置
+            Log.i("TAG", "location.getAddrStr()=" + location.getAddrStr());
+            //打印出当前城市
+            Log.i("TAG", "location.getCity()=" + location.getCity());
+            //打印出当前县、区
+            Log.i("TAG", "location.district()=" + location.getDistrict());
+            //打印出当前城市码
+            Log.i("TAG", "location.getcitycode()=" + location.getCityCode());
+            //返回码
+            int i = location.getLocType();
+            Log.i("TAG", "location.getLocType()=" + i);
+            String city1 = location.getDistrict();
+//            String city1 = "大兴区";
+            if (city1 != null) {
+                String substring = city1.substring(0, city1.length() - 1);//去除最后的“区”字
+                Log.i("TAG", "substring=" + substring);
+                String code = MyApplication.getInstance().mCityDB.getCityCodeByCity(substring);
+                Log.i("TAG", "code=" + code);
+                if (!code.isEmpty()) {
+                    Global.CITY_CODE = code;
+                    //启动查询天气的service
+                    startWeatherService();
+                    //显示进度条
+                    setUpdateProgressbar(true);
+                    Toast.makeText(MainActivity.this,"定位到"+city1,Toast.LENGTH_SHORT).show();
+
+                }else {
+                    Toast.makeText(MainActivity.this,"定位失败！",Toast.LENGTH_SHORT).show();
+                }
+            }else {
+                Toast.makeText(MainActivity.this,"定位失败！",Toast.LENGTH_SHORT).show();
+            }
+            mLocationClient.stop();
+
+
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 }

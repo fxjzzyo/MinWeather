@@ -15,7 +15,7 @@ import cn.edu.pku.zhangqixun.bean.City;
 
 public class CityDB {
     public static final String CITY_DB_NAME = "city.db";
-    private static final String CITY_TABLE_NAME = "city";
+    private static final String CITY_TABLE_NAME = "main.city";
     private SQLiteDatabase db;
 
     public CityDB(Context context, String path) {
@@ -37,5 +37,20 @@ public class CityDB {
             list.add(item);
         }
         return list;
+    }
+
+    /**
+     * 根据城市名，获取城市码
+     * @param city
+     * @return
+     */
+    public String getCityCodeByCity(String city) {
+        String code = "";
+        Cursor c = db.query(CITY_TABLE_NAME,new String[]{"number"},"city like ?",new String[]{city},null,null,null);
+        while (c.moveToNext()) {
+            code = c.getString(c.getColumnIndex("number"));
+        }
+        return code;
+
     }
 }

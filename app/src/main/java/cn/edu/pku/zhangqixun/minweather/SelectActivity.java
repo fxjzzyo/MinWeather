@@ -13,6 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,5 +150,16 @@ private ImageView mBackBtn;
             default:
                 break;
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 }

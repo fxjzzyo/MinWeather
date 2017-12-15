@@ -10,6 +10,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,5 +113,17 @@ public class GuideActivity extends Activity {
                 break;
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 }
