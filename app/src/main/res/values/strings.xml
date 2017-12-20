@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">MinWeather</string>
     <string name="search_city">search city by words</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>
