@@ -53,4 +53,30 @@ public class CityDB {
         return code;
 
     }
+    /**
+     * 根据城市名，获取省份
+     * @param city
+     * @return
+     */
+    public String getProvinceByCity(String city) {
+        String province = "";
+        Cursor c = db.query(CITY_TABLE_NAME,new String[]{"province"},"city like ?",new String[]{city},null,null,null);
+        while (c.moveToNext()) {
+            province = c.getString(c.getColumnIndex("province"));
+        }
+        return province;
+    }
+    /**
+     * 根据省，获取省会城市
+     * @param province
+     * @return
+     */
+    public String getMainCityByProvince(String province) {
+        String city = "";
+        Cursor c = db.query(CITY_TABLE_NAME,new String[]{"city"},"province like ?",new String[]{province},null,null,null,"1");
+        while (c.moveToNext()) {
+            city = c.getString(c.getColumnIndex("city"));
+        }
+        return city;
+    }
 }

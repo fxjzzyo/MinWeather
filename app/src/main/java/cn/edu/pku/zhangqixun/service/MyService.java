@@ -55,7 +55,8 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("tag", "-------service onStartCommand-------");
-        new QueryWeatherTask().execute(Global.CITY_CODE);
+        String code = intent.getStringExtra("code");
+        new QueryWeatherTask().execute(code);
 
         return super.onStartCommand(intent, flags, startId);
 
@@ -76,11 +77,17 @@ public class MyService extends Service {
         if (!response.isEmpty()) {//如果返回不为空
             //解析xml数据
             weatherInfo = parseXML(response);
-            //存储天气数据到sharedpreference
-            saveWeatherToSpf(weatherInfo.getTodayWeather());
-            //存储当前城市代码
-            SPFutils.saveStringData(getBaseContext(), "main_city_code", cityCode);
-            return weatherInfo;
+            todayWeather = weatherInfo.getTodayWeather();
+            if (todayWeather != null) {
+                if (Global.FLAG == 0) {
+                    //存储天气数据到sharedpreference
+                    saveWeatherToSpf(todayWeather);
+                    //存储当前城市代码
+                    SPFutils.saveStringData(getBaseContext(), "main_city_code", cityCode);
+                }else {//只存储省会的pm25作为本城市的pm25
+                    SPFutils.saveStringData(this, "pm25", todayWeather.getPm25());
+                }
+            }
         }
         return weatherInfo;
 
@@ -92,7 +99,6 @@ public class MyService extends Service {
      * @param todayWeather
      */
     private void saveWeatherToSpf(TodayWeather todayWeather) {
-        if (todayWeather != null) {
             SPFutils.saveStringData(this, "city", todayWeather.getCity());
             SPFutils.saveStringData(this, "updatetime", todayWeather.getUpdatetime());
             SPFutils.saveStringData(this, "wendu", todayWeather.getWendu());
@@ -104,7 +110,6 @@ public class MyService extends Service {
             SPFutils.saveStringData(this, "high", todayWeather.getHigh());
             SPFutils.saveStringData(this, "low", todayWeather.getLow());
             SPFutils.saveStringData(this, "type", todayWeather.getType());
-        }
     }
 
     /**
