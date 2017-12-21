@@ -119,8 +119,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     /**
      * 启动查询天气的service
      */
-    private void startWeatherService() {
+    private void startWeatherService(String code) {
         Intent intent = new Intent(this, MyService.class);
+        intent.putExtra("code", code);
         startService(intent);
 
     }
@@ -130,8 +131,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onResume();
         MobclickAgent.onResume(this);
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+            Global.FLAG = 0;//标记查询的是普通城市天气
             //启动查询天气的service
-            startWeatherService();
+            startWeatherService(Global.CITY_CODE);
             //显示进度条
             setUpdateProgressbar(true);
         } else {
@@ -209,8 +211,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 Log.d("myWeather", cityCode);
                 if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                     Log.d("myWeather", "网络OK");
+                    Global.FLAG = 0;//标记当前查询的是普通城市
                     //启动查询天气的service
-                    startWeatherService();
+                    startWeatherService(Global.CITY_CODE);
                     //显示更新进度条
                     setUpdateProgressbar(true);
                 } else {
@@ -391,27 +394,47 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      * @param todayWeather
      */
     private void updateTodayWeather(TodayWeather todayWeather) {
-        currentCity = todayWeather.getCity();
-        city_name_Tv.setText(currentCity + "天气");
-        cityTv.setText(todayWeather.getCity());
-        timeTv.setText(todayWeather.getUpdatetime() + "发布");
-        humidityTv.setText("湿度：" + todayWeather.getShidu());
-        tvWendu.setText("温度：" + todayWeather.getWendu()+"°C");
-        if (todayWeather.getPm25() == null) {//当pm2.5没有值时，显示未知
-            pmDataTv.setText("未知");
-        }else {
-            pmDataTv.setText(todayWeather.getPm25());
-        }
-        pmQualityTv.setText(todayWeather.getQuality());
-        weekTv.setText(todayWeather.getDate());
-        temperatureTv.setText( todayWeather.getLow()+ "~" +todayWeather.getHigh() );
-        climateTv.setText(todayWeather.getType());
-        windTv.setText("风力:" + todayWeather.getFengli());
+        if (Global.FLAG == 1) {//如果当前请求的是省会城市，则只需更新pm25
+            String pm25 = todayWeather.getPm25();
+            if (pm25 == null) {//当pm2.5没有值时，显示未知
+                pmDataTv.setText("未知");
+            }else {
+                pmDataTv.setText(pm25);
+                //设置pm2.5的图片
+                setPM25Img(todayWeather.getPm25());
+            }
+        }else {//普通城市，则更新所有信息
+            currentCity = todayWeather.getCity();
+            city_name_Tv.setText(currentCity + "天气");
+            cityTv.setText(todayWeather.getCity());
+            timeTv.setText(todayWeather.getUpdatetime() + "发布");
+            humidityTv.setText("湿度：" + todayWeather.getShidu());
+            tvWendu.setText("温度：" + todayWeather.getWendu()+"°C");
+            if (todayWeather.getPm25() == null) {//当pm2.5没有值时，显示未知
+                //显示其省会城市的pm2.5
+                String city = todayWeather.getCity();
+                //获取该城市对应的省份
+                MyApplication myApplication = MyApplication.getInstance();
+                String province = myApplication.mCityDB.getProvinceByCity(city);
+                String mainCityByProvince = myApplication.mCityDB.getMainCityByProvince(province);
+                String mainCode = myApplication.mCityDB.getCityCodeByCity(mainCityByProvince);
+                Global.FLAG = 1;//标记请求省会城市的pm25
+                startWeatherService(mainCode);
+            }else {
+                pmDataTv.setText(todayWeather.getPm25());
+            }
+            pmQualityTv.setText(todayWeather.getQuality());
+            weekTv.setText(todayWeather.getDate());
+            temperatureTv.setText( todayWeather.getLow()+ "~" +todayWeather.getHigh() );
+            climateTv.setText(todayWeather.getType());
+            windTv.setText("风力:" + todayWeather.getFengli());
 
-        //设置天气图片
-        setWeatherImg(todayWeather.getType());
-        //设置pm2.5的图片
-        setPM25Img(todayWeather.getPm25());
+            //设置天气图片
+            setWeatherImg(todayWeather.getType());
+            //设置pm2.5的图片
+            setPM25Img(todayWeather.getPm25());
+        }
+
         Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
 
     }
@@ -443,8 +466,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 Log.i("TAG", "code=" + code);
                 if (!code.isEmpty()) {
                     Global.CITY_CODE = code;
+                    Global.FLAG = 0;//标记查询的是普通城市天气
                     //启动查询天气的service
-                    startWeatherService();
+                    startWeatherService(Global.CITY_CODE);
                     //显示进度条
                     setUpdateProgressbar(true);
                     Toast.makeText(MainActivity.this,"定位到"+city1,Toast.LENGTH_SHORT).show();

@@ -10,6 +10,7 @@ import android.widget.RemoteViews;
 
 import java.io.Serializable;
 
+import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
 import cn.edu.pku.zhangqixun.bean.WeatherInfo;
 import cn.edu.pku.zhangqixun.minweather.R;
@@ -113,6 +114,9 @@ public class MyWeatherWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        if (Global.FLAG == 1) {//不接受为了获取pm25而产生的广播
+            return;
+        }
         Log.i("tag", "onReceive");
         Serializable weather = intent.getSerializableExtra("weather");
         if (weather != null) {
