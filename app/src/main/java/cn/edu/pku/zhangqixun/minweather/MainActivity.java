@@ -125,7 +125,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private void startWeatherService(String code) {
         Intent intent = new Intent(this, MyService.class);
         intent.putExtra("code", code);
-//        intent.putExtra("type", type);//用于标记请求pm25还是正常查询
         startService(intent);
 
     }
