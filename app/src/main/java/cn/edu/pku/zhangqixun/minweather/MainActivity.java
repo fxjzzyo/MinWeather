@@ -90,6 +90,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         };
         IntentFilter filter = new IntentFilter();
         filter.addAction(Global.WEATHER_RECEIVED);
+        filter.addAction(Global.WEATHER_PM25_RECEIVED);
         registerReceiver(mBroadcastReceiver, filter);
 
         mUpdateBtn.setOnClickListener(this);
@@ -116,12 +117,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         option.setIsNeedAddress(true);//反编译获得具体位置，只有网络定位才可以
         mLocationClient.setLocOption(option);
     }
+
     /**
      * 启动查询天气的service
+     * @param code
      */
     private void startWeatherService(String code) {
         Intent intent = new Intent(this, MyService.class);
         intent.putExtra("code", code);
+//        intent.putExtra("type", type);//用于标记请求pm25还是正常查询
         startService(intent);
 
     }
@@ -416,7 +420,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 //获取该城市对应的省份
                 MyApplication myApplication = MyApplication.getInstance();
                 String province = myApplication.mCityDB.getProvinceByCity(city);
+                Log.i("tag","province:"+province);
                 String mainCityByProvince = myApplication.mCityDB.getMainCityByProvince(province);
+                Log.i("tag","mainCityByProvince:"+mainCityByProvince);
                 String mainCode = myApplication.mCityDB.getCityCodeByCity(mainCityByProvince);
                 Global.FLAG = 1;//标记请求省会城市的pm25
                 startWeatherService(mainCode);

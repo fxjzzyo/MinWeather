@@ -109,9 +109,6 @@ public class ForecastFragment2 extends Fragment {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (Global.FLAG == 1) {//不接受为了获取pm25而产生的广播
-                    return;
-                }
                 Serializable weather = intent.getSerializableExtra("weather");
                 if (weather == null) {
                     Toast.makeText(getActivity(),"请求失败！",Toast.LENGTH_SHORT).show();

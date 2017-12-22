@@ -23,6 +23,7 @@ import cn.edu.pku.zhangqixun.util.NetUtil;
 import cn.edu.pku.zhangqixun.util.SPFutils;
 
 public class MyService extends Service {
+    private String type;
     public MyService() {
     }
 
@@ -56,6 +57,7 @@ public class MyService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("tag", "-------service onStartCommand-------");
         String code = intent.getStringExtra("code");
+        type = intent.getStringExtra("type");
         new QueryWeatherTask().execute(code);
 
         return super.onStartCommand(intent, flags, startId);
@@ -78,6 +80,7 @@ public class MyService extends Service {
             //解析xml数据
             weatherInfo = parseXML(response);
             todayWeather = weatherInfo.getTodayWeather();
+
             if (todayWeather != null) {
                 if (Global.FLAG == 0) {
                     //存储天气数据到sharedpreference
@@ -351,7 +354,11 @@ public class MyService extends Service {
         @Override
         protected void onPostExecute(WeatherInfo weatherInfo) {
             Intent intent = new Intent();
-            intent.setAction(Global.WEATHER_RECEIVED);
+            if (Global.FLAG == 0) {
+                intent.setAction(Global.WEATHER_RECEIVED);
+            }else {
+                intent.setAction(Global.WEATHER_PM25_RECEIVED);
+            }
             intent.putExtra("weather", weatherInfo);
             sendBroadcast(intent);
         }

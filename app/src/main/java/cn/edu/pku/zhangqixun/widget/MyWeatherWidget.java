@@ -1,5 +1,6 @@
 package cn.edu.pku.zhangqixun.widget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -10,9 +11,9 @@ import android.widget.RemoteViews;
 
 import java.io.Serializable;
 
-import cn.edu.pku.zhangqixun.bean.Global;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
 import cn.edu.pku.zhangqixun.bean.WeatherInfo;
+import cn.edu.pku.zhangqixun.minweather.MainActivity;
 import cn.edu.pku.zhangqixun.minweather.R;
 
 /**
@@ -30,6 +31,7 @@ public class MyWeatherWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.appwidget_wendu, wendu + "°C");
         views.setTextViewText(R.id.appwidget_type, type);
         views.setTextViewText(R.id.appwidget_address, city);
+        views.setOnClickPendingIntent(R.id.rl_widget,getPendingIntent(context));
         setWeatherImg(views, type);
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -114,10 +116,12 @@ public class MyWeatherWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        if (Global.FLAG == 1) {//不接受为了获取pm25而产生的广播
+       /* if(intent.getAction().equals("cn.edu.pku.widget.click")){
+            Log.i("tag", "-----tiaozhuan------");
+            Intent intent1 = new Intent(context, MainActivity.class);
+            context.startActivity(intent1);
             return;
-        }
-        Log.i("tag", "onReceive");
+        }*/
         Serializable weather = intent.getSerializableExtra("weather");
         if (weather != null) {
             TodayWeather todayWeather = ((WeatherInfo) weather).getTodayWeather();
@@ -135,6 +139,7 @@ public class MyWeatherWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.appwidget_wendu, wendu + "°C");
         views.setTextViewText(R.id.appwidget_type, type);
         views.setTextViewText(R.id.appwidget_address, city);
+//        views.setOnClickPendingIntent(R.id.rl,getPendingIntent(context));
         setWeatherImg(views, type);
         // Instruct the widget manager to update the widget
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -143,12 +148,26 @@ public class MyWeatherWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+    private static PendingIntent getPendingIntent(Context context) {
+        Intent intent = new Intent("cn.edu.pku.widget.click");
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0 );
+        return pi;
+    }
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Log.i("tag", "onUpdate");
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            //创建一个Intent对象，跳转到app界面
+            Intent intent = new Intent(context, MainActivity.class);
+            //创建一个PendingIntent，包主intent
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            //获取wiget布局
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.my_weather_widget);
+            remoteViews.setOnClickPendingIntent(R.id.rl_widget, pendingIntent);
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+//            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
