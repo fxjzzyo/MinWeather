@@ -13,9 +13,11 @@ ____
 
 ### 运行效果：
 - gif演示
-![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather1.gif "概览")   ![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather2.gif "拼音搜索城市")
 
-![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather3.gif "桌面天气小部件")   ![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather4.gif "定位功能")
+![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather1.gif "概览")   	![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather2.gif "拼音搜索城市")
+
+![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather3.gif "桌面天气小部件")   	![](https://github.com/fxjzzyo/MinWeather/raw/master/img/min_weather4.gif "定位功能")
 
 - 首页截图
+
 ![](https://github.com/fxjzzyo/MinWeather/raw/master/img/jietu_main.jpg "运行效果")
